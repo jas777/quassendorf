@@ -1,0 +1,19 @@
+{
+  "name": "Quassendorf",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "jas777",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "@types/fastify-cors": "^2.1.0",
+    "@types/i2c-bus": "^5.1.0",
+    "@types/node-dijkstra": "^2.5.0",
+    "fastify": "^2.15.0",
+    "fastify-cors": "^3.0.3",
+    "i2c-bus": "5.2.0",
+    "node-dijkstra": "^2.5.0"
+  }
+}

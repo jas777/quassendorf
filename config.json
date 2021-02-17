@@ -1,0 +1,798 @@
+{
+  "signals": [
+    {
+      "id": 1,
+      "aspects": [
+        {
+          "aspectId": 3,
+          "pin": "24-L"
+        },
+        {
+          "aspectId": 0,
+          "pin": "22-L"
+        },
+        {
+          "aspectId": 1,
+          "pin": "23-L"
+        }
+      ],
+      "ahead": {
+        "switch": 4,
+        "backwards": true
+      },
+      "back": "WLD"
+    },
+    {
+      "id": 2,
+      "aspects": [
+        {
+          "aspectId": 3,
+          "pin": "29-L"
+        },
+        {
+          "aspectId": 0,
+          "pin": "29-H"
+        },
+        {
+          "aspectId": 1,
+          "pin": "29-H"
+        }
+      ],
+      "ahead": {
+        "switch": 8,
+        "backwards": false
+      },
+      "repeaters": [
+        {
+          "aspects": [
+            {
+              "aspectId": 3,
+              "pin": "29-L"
+            },
+            {
+              "aspectId": 0,
+              "pin": "29-H"
+            },
+            {
+              "aspectId": 1,
+              "pin": "29-H"
+            }
+          ],
+          "name": "Tarcza wjazdowa 2"
+        }
+      ],
+      "back": "PP1"
+    },
+    {
+      "id": 3,
+      "aspects": [
+        {
+          "aspectId": 3,
+          "pin": "20-L"
+        },
+        {
+          "aspectId": 0,
+          "pin": "20-H"
+        },
+        {
+          "aspectId": 1,
+          "pin": "20-H"
+        }
+      ],
+      "ahead": {
+        "switch": 7,
+        "backwards": false
+      },
+      "back": "10"
+    },
+    {
+      "id": 4,
+      "aspects": [
+        {
+          "aspectId": 3,
+          "pin": "31-L"
+        },
+        {
+          "aspectId": 0,
+          "pin": "31-H"
+        },
+        {
+          "aspectId": 1,
+          "pin": "31-H"
+        }
+      ],
+      "ahead": {
+        "switch": 19,
+        "backwards": true
+      },
+      "back": "PP2"
+    },
+    {
+      "id": 5,
+      "aspects": [
+        {
+          "aspectId": 3,
+          "pin": "30-L"
+        },
+        {
+          "aspectId": 0,
+          "pin": "30-H"
+        },
+        {
+          "aspectId": 1,
+          "pin": "30-H"
+        }
+      ],
+      "ahead": {
+        "switch": 18,
+        "backwards": false
+      },
+      "back": "16"
+    },
+    {
+      "id": 6,
+      "aspects": [
+        {
+          "aspectId": 3,
+          "pin": "21-H"
+        },
+        {
+          "aspectId": 0,
+          "pin": "26-L"
+        },
+        {
+          "aspectId": 1,
+          "pin": "25-L"
+        }
+      ],
+      "ahead": {
+        "switch": 24,
+        "backwards": true
+      },
+      "back": "WPG"
+    }
+  ],
+  "lighting": [
+    {
+      "name": "Semafory",
+      "pins": [
+        "27-L",
+        "28-L"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "type": "point",
+      "id": 100,
+      "right": 3,
+      "name": "WLG",
+      "position": {
+        "x": 1,
+        "y": 1
+      }
+    },
+    {
+      "type": "point",
+      "id": 200,
+      "right": 4,
+      "name": "WLD",
+      "position": {
+        "x": 1,
+        "y": 3
+      }
+    },
+    {
+      "type": "point",
+      "id": 500,
+      "left": 25,
+      "name": "WPD",
+      "position": {
+        "x": 36,
+        "y": 3
+      }
+    },
+    {
+      "type": "point",
+      "id": 400,
+      "left": 24,
+      "name": "WPG",
+      "position": {
+        "x": 36,
+        "y": 1
+      }
+    },
+    {
+      "type": "point",
+      "id": 500,
+      "left": 8,
+      "right": 23,
+      "name": "PP1",
+      "position": {
+        "x": 18,
+        "y": 1
+      }
+    },
+    {
+      "type": "point",
+      "id": 600,
+      "left": 6,
+      "right": 19,
+      "name": "PP2",
+      "position": {
+        "x": 15,
+        "y": 3
+      }
+    },
+    {
+      "type": "point",
+      "id": 700,
+      "left": 20,
+      "name": "W",
+      "position": {
+        "x": 36,
+        "y": 5
+      }
+    },
+    {
+      "type": "point",
+      "id": 800,
+      "right": 7,
+      "name": "MS",
+      "position": {
+        "x": 5.5,
+        "y": 5
+      }
+    },
+    {
+      "type": "point",
+      "id": 901,
+      "left": 20,
+      "right": 21,
+      "name": "BW-S",
+      "position": {
+        "x": 25,
+        "y": 7
+      }
+    },
+    {
+      "type": "point",
+      "id": 900,
+      "left": 21,
+      "name": "BWRC",
+      "position": {
+        "x": 30,
+        "y": 7
+      }
+    },
+    {
+      "type": "point",
+      "id": 1001,
+      "left": 21,
+      "right": "BWRB",
+      "name": "BWRB-S",
+      "position": {
+        "x": 28,
+        "y": 9
+      }
+    },
+    {
+      "type": "point",
+      "id": 1000,
+      "left": "BWRB-S",
+      "name": "BWRB",
+      "position": {
+        "x": 34,
+        "y": 9
+      }
+    },
+    {
+      "type": "point",
+      "id": 1100,
+      "right": 12,
+      "name": "B1",
+      "position": {
+        "x": 1,
+        "y": 7
+      }
+    },
+    {
+      "type": "point",
+      "id": 1200,
+      "right": 13,
+      "name": "B2",
+      "position": {
+        "x": 1,
+        "y": 9
+      }
+    },
+    {
+      "type": "point",
+      "id": 1500,
+      "right": "B3-S",
+      "name": "B3",
+      "position": {
+        "x": 1,
+        "y": 11
+      }
+    },
+    {
+      "type": "point",
+      "id": 1501,
+      "right": 13,
+      "left": "B3",
+      "name": "B3-S",
+      "position": {
+        "x": 13,
+        "y": 11
+      }
+    },
+    {
+      "type": "point",
+      "id": 1400,
+      "left": 10,
+      "right": 16,
+      "name": "TT1",
+      "position": {
+        "x": 15,
+        "y": 5
+      }
+    },
+    {
+      "type": "switch",
+      "id": 3,
+      "minus": {
+        "pin": "0-L",
+        "node": "8",
+        "cost": 1.5
+      },
+      "plus": {
+        "pin": "0-H",
+        "node": "4",
+        "cost": 1
+      },
+      "back": {
+        "node": "WLG",
+        "cost": 0.5
+      },
+      "facing": "right",
+      "orientation": "down",
+      "position": {
+        "x": 3,
+        "y": 1
+      }
+    },
+    {
+      "type": "switch",
+      "id": 4,
+      "minus": {
+        "pin": "1-L",
+        "node": "WLD",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "1-H",
+        "node": "3",
+        "cost": 1
+      },
+      "back": {
+        "node": "5",
+        "cost": 0.5
+      },
+      "facing": "left",
+      "orientation": "up",
+      "position": {
+        "x": 5,
+        "y": 3
+      }
+    },
+    {
+      "type": "switch",
+      "id": 5,
+      "minus": {
+        "pin": "2-H",
+        "node": "6",
+        "cost": 0.5
+      },
+      "plus": {
+        "pin": "2-L",
+        "node": "7",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "4",
+        "cost": 0.5
+      },
+      "facing": "right",
+      "orientation": "down",
+      "position": {
+        "x": 6,
+        "y": 3
+      }
+    },
+    {
+      "type": "switch",
+      "id": 6,
+      "minus": {
+        "pin": "3-L",
+        "node": "PP2",
+        "cost": 2
+      },
+      "plus": {
+        "pin": "3-H",
+        "node": "8",
+        "cost": 1
+      },
+      "back": {
+        "node": "5",
+        "cost": 0.5
+      },
+      "facing": "right",
+      "orientation": "up",
+      "position": {
+        "x": 7,
+        "y": 3
+      }
+    },
+    {
+      "type": "switch",
+      "id": 7,
+      "minus": {
+        "pin": "4-H",
+        "node": "MS",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "4-L",
+        "node": "5",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "10",
+        "cost": 0.5
+      },
+      "facing": "left",
+      "orientation": "up",
+      "position": {
+        "x": 8,
+        "y": 5
+      }
+    },
+    {
+      "type": "switch",
+      "id": 8,
+      "minus": {
+        "pin": "5-H",
+        "node": "3",
+        "cost": 1.5
+      },
+      "plus": {
+        "pin": "5-L",
+        "node": "6",
+        "cost": 1
+      },
+      "back": {
+        "node": "PP1",
+        "cost": 3
+      },
+      "facing": "left",
+      "orientation": "down",
+      "position": {
+        "x": 9,
+        "y": 1
+      }
+    },
+    {
+      "type": "switch",
+      "id": 10,
+      "minus": {
+        "pin": "6-L",
+        "node": "TT1",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "6-H",
+        "node": "12",
+        "cost": 1
+      },
+      "back": {
+        "node": "7",
+        "cost": 1
+      },
+      "facing": "right",
+      "orientation": "down",
+      "position": {
+        "x": 11,
+        "y": 5
+      }
+    },
+    {
+      "type": "switch",
+      "id": 12,
+      "minus": {
+        "pin": "7-L",
+        "node": "B1",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "7-H",
+        "node": "10",
+        "cost": 1
+      },
+      "back": {
+        "node": "14",
+        "cost": 1
+      },
+      "facing": "left",
+      "orientation": "up",
+      "position": {
+        "x": 13,
+        "y": 7
+      }
+    },
+    {
+      "type": "switch",
+      "id": 13,
+      "minus": {
+        "pin": "8-H",
+        "node": "B3-S",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "8-L",
+        "node": "B2",
+        "cost": 1
+      },
+      "back": {
+        "node": "14",
+        "cost": 0.5
+      },
+      "facing": "left",
+      "orientation": "up",
+      "position": {
+        "x": 15,
+        "y": 9
+      }
+    },
+    {
+      "type": "switch",
+      "id": 14,
+      "minus": {
+        "pin": "9-H",
+        "node": "13",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "9-L",
+        "node": "12",
+        "cost": 1
+      },
+      "back": {
+        "node": "16",
+        "cost": 2
+      },
+      "facing": "left",
+      "orientation": "up",
+      "position": {
+        "x": 17,
+        "y": 7
+      }
+    },
+    {
+      "type": "switch",
+      "id": 16,
+      "minus": {
+        "pin": "10-L",
+        "node": "TT1",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "10-H",
+        "node": "14",
+        "cost": 1
+      },
+      "back": {
+        "node": "18",
+        "cost": 1
+      },
+      "facing": "left",
+      "orientation": "down",
+      "position": {
+        "x": 19,
+        "y": 5
+      }
+    },
+    {
+      "type": "switch",
+      "id": 18,
+      "minus": {
+        "pin": "11-H",
+        "node": "20",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "11-L",
+        "node": "19",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "16",
+        "cost": 1
+      },
+      "facing": "right",
+      "orientation": "up",
+      "position": {
+        "x": 20,
+        "y": 5
+      }
+    },
+    {
+      "type": "switch",
+      "id": 19,
+      "minus": {
+        "pin": "12-L",
+        "node": "PP2",
+        "cost": 2
+      },
+      "plus": {
+        "pin": "12-H",
+        "node": "18",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "22",
+        "cost": 1
+      },
+      "facing": "left",
+      "orientation": "down",
+      "position": {
+        "x": 22,
+        "y": 3
+      }
+    },
+    {
+      "type": "switch",
+      "id": 20,
+      "minus": {
+        "pin": "13-H",
+        "node": "W",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "13-L",
+        "node": "BW-S",
+        "cost": 1
+      },
+      "back": {
+        "node": "18",
+        "cost": 0.5
+      },
+      "facing": "right",
+      "orientation": "down",
+      "position": {
+        "x": 23,
+        "y": 5
+      }
+    },
+    {
+      "type": "switch",
+      "id": 21,
+      "minus": {
+        "pin": "14-H",
+        "node": "BWRC",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "14-L",
+        "node": "BWRB-S",
+        "cost": 1
+      },
+      "back": {
+        "node": "BW-S",
+        "cost": 1
+      },
+      "facing": "right",
+      "orientation": "down",
+      "position": {
+        "x": 26,
+        "y": 7
+      }
+    },
+    {
+      "type": "switch",
+      "id": 22,
+      "minus": {
+        "pin": "15-L",
+        "node": "25",
+        "cost": 2
+      },
+      "plus": {
+        "pin": "15-H",
+        "node": "23",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "19",
+        "cost": 1
+      },
+      "facing": "right",
+      "orientation": "up",
+      "position": {
+        "x": 26,
+        "y": 3
+      }
+    },
+    {
+      "type": "switch",
+      "id": 23,
+      "minus": {
+        "pin": "16-L",
+        "node": "PP1",
+        "cost": 3
+      },
+      "plus": {
+        "pin": "16-H",
+        "node": "22",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "24",
+        "cost": 1
+      },
+      "facing": "left",
+      "orientation": "down",
+      "position": {
+        "x": 28,
+        "y": 1
+      }
+    },
+    {
+      "type": "switch",
+      "id": 24,
+      "minus": {
+        "pin": "17-L",
+        "node": "WPG",
+        "cost": 1
+      },
+      "plus": {
+        "pin": "17-H",
+        "node": "25",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "23",
+        "cost": 1
+      },
+      "facing": "right",
+      "orientation": "down",
+      "position": {
+        "x": 30,
+        "y": 1
+      }
+    },
+    {
+      "type": "switch",
+      "id": 25,
+      "minus": {
+        "pin": "18-L",
+        "node": "22",
+        "cost": 2
+      },
+      "plus": {
+        "pin": "18-H",
+        "node": "24",
+        "cost": 0.5
+      },
+      "back": {
+        "node": "WPD",
+        "cost": 1
+      },
+      "facing": "left",
+      "orientation": "up",
+      "position": {
+        "x": 32,
+        "y": 3
+      }
+    }
+  ]
+}
