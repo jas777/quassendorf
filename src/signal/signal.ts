@@ -1,7 +1,7 @@
 import Station from "../station/station";
 import Node from "../node/node";
-import {RailSwitch} from "../switch/switch";
 import MCP23017 from "../mcp/MCP23017";
+import {determineName} from "../util/nameUtil";
 
 export class Signal {
     station: Station;
@@ -38,10 +38,9 @@ export class Signal {
         if (!this.aspects.find((c) => c.aspectId == aspectId))
             throw new Error("Invalid aspect!");
 
-        this.aspects
+        this.aspects // Disable every aspect except the desired one
             .filter((c) => c.aspectId != aspectId)
             .forEach((aspect) => {
-                // const targetAspect = this.aspects.find((c) => c.aspectId == aspectId);
                 const state = aspect.pin.split("-")[1] == "H" ? 1 : 0;
                 const pinNum = Number.parseInt(aspect.pin.split("-")[0]);
 
@@ -55,30 +54,15 @@ export class Signal {
                     }
 
                 }
-
-                // if (
-                //   targetAspect &&
-                //   Number.parseInt(targetAspect.pin.split("-")[0]) != pinNum
-                // ) {
-                //   const mcp = this.station.controllers[Math.floor(pinNum / 16)];
-                //   const pin =
-                //     pinNum > 15
-                //       ? pinNum - this.station.controllers.indexOf(mcp) * 16
-                //       : pinNum;
-                //
-                //   if (mcp.readPin(pin) == state) {
-                //     mcp.writePin(pin, state == 1 ? 0 : 1);
-                //   }
-                // }
             });
 
-        const aspect = this.aspects.find((c) => c.aspectId == aspectId);
+        const aspect = this.aspects.find((c) => c.aspectId == aspectId); // Find the desired aspect
 
-        this.finalizeAspect(aspect);
+        this.finalizeAspect(aspect); // Set the aspect
 
-        this.aspect = aspectId;
+        this.aspect = aspectId; // Update the aspect variable
 
-        this.updateRepeaters();
+        this.updateRepeaters(); // Update all repeaters linked to this signal
 
     }
 
@@ -88,7 +72,7 @@ export class Signal {
             if (!repeater.aspects.find((c) => c.aspectId == this.aspect))
                 throw new Error("Invalid aspect!");
 
-            repeater.aspects
+            repeater.aspects // Disable every aspect except the desired one
                 .filter((c) => c.aspectId != this.aspect)
                 .forEach((aspect) => {
                     const state = aspect.pin.split("-")[1] == "H" ? 1 : 0;
@@ -106,9 +90,9 @@ export class Signal {
                     }
                 });
 
-            const aspect = repeater.aspects.find((c) => c.aspectId == this.aspect);
+            const aspect = repeater.aspects.find((c) => c.aspectId == this.aspect); // Find the aspect
 
-            this.finalizeAspect(aspect);
+            this.finalizeAspect(aspect); // Set the aspect
 
         });
 
@@ -128,11 +112,10 @@ export class Signal {
         }
     }
 
-    allow(to?: string) {
+    allow(to: string) {
 
-        const nodeAhead: Node = this.station.config.nodes
-            .filter((n) => n.type == "switch")
-            .find((s) => s.id == this.switchAhead) as Node;
+        const nodeAhead: Node | null = this.station.findNode(this.switchAhead.toString());
+
         const switchAhead = this.station.switches.find(
             (s) => s.id == this.switchAhead
         );
@@ -143,125 +126,83 @@ export class Signal {
         let safe: boolean = true;
         let directionChange: boolean = false;
         let node: Node = nodeAhead as Node;
-        let prev: Node;
+        let prev: Node = node;
         let last: Node = node;
+        let lastSwitch: Node = nodeAhead;
+
+        let bypass: boolean = false;
 
         let nextNode: Node;
 
-        if (this.backwards) {
-            node = this.station.config.nodes.find(
-                (n) => (n.type == "switch" ? n.id.toString() : n.name ? n.name : `PT${n.id}`) == node.back?.node
-            ) as Node;
+        if (this.backwards) { // If the switch ahead is facing the signal
+            node = this.station.findNode(node.back!!.node)!! // Find the point behind the switch (always behind because the switch is backwards)
 
-            if (node.facing == nodeAhead.facing) {
-                nextNode = this.station.config.nodes.find(
-                    (n) => (n.type == "switch" ? n.id.toString() : n.name ? n.name : `PT${n.id}`) == node.back?.node
-                ) as Node;
+            if (node.facing == nodeAhead.facing) { // If node is facing the signal too, do the same
+                nextNode = this.station.findNode(node.back!!.node)!!;
             } else {
-                if (node.type == "switch") {
-                    const asSwitch = this.station.switches.find(s => s.id == node.id);
-                    if (asSwitch?.state == 1) {
-                        nextNode = this.station.config.nodes.find((n) =>
-                            n.type == "switch"
-                                ? n.id.toString() == node.plus?.node
-                                : n.name
-                                ? n.name == node.plus?.node
-                                : `PT${n.id}` == node.plus?.node
-                        ) as Node;
+                if (node.type == "switch") { // If the node is a switch
+                    const asSwitch = this.station.switches.find(s => s.id == node.id); // Find the switch object in the station
+
+                    if (asSwitch?.state == 1) { // If the switch is turned to plus the next node will be the point neighboring with plus
+                        nextNode = nextNode = this.station.findNode(node.plus?.node!!)!!;
                     } else {
-                        nextNode = this.station.config.nodes.find((n) =>
-                            n.type == "switch"
-                                ? n.id.toString() == node.minus?.node
-                                : n.name
-                                ? n.name == node.minus?.node
-                                : `PT${n.id}` == node.minus?.node
-                        ) as Node;
+                        nextNode = this.station.findNode(node.minus?.node!!)!!; // Else it will be the minus neighbor
                     }
+
                 } else {
+                    // TODO: Try to figure out why I wrote this
                     nextNode = this.station.config.nodes.find(n => n[nodeAhead.facing ?? "left"] == nodeAhead.id.toString()) as Node;
                 }
             }
 
         } else {
 
-            if (switchAhead?.state == 1) {
-                nextNode = this.station.config.nodes.find((n) =>
-                    n.type == "switch"
-                        ? n.id.toString() == node.plus?.node
-                        : n.name
-                        ? n.name == node.plus?.node
-                        : `PT${n.id}` == node.plus?.node
-                ) as Node;
+            if (switchAhead?.state == 1) { // If it's not backwards just follow the standard procedure to determine the next node
+                nextNode = nextNode = this.station.findNode(node.plus?.node!!)!!;
             } else {
-                nextNode = this.station.config.nodes.find((n) =>
-                    n.type == "switch"
-                        ? n.id.toString() == node.minus?.node
-                        : n.name
-                        ? n.name == node.minus?.node
-                        : `PT${n.id}` == node.minus?.node
-                ) as Node;
+                nextNode = this.station.findNode(node.minus?.node!!)!!;
             }
+
         }
 
         while (!finished) {
 
             let asSwitch = this.station.switches.find((s) => s.id == node.id);
 
+            // If the node is facing the opposite direction to the signal, the next node will be behind it
             if (node.facing != (this.backwards ? nodeAhead.facing == "right" ? "left" : "right" : nodeAhead.facing)) {
-                nextNode = this.station.config.nodes.find(
-                    (n) => (n.type == "switch" ? n.id.toString() : n.name ? n.name : `PT${n.id}`) == node.back?.node
-                ) as Node;
+                nextNode = this.station.findNode(node.back?.node!!)!!;
             } else {
 
                 if (asSwitch?.state == 1) {
-                    nextNode = this.station.config.nodes.find((n) =>
-                        n.type == "switch"
-                            ? n.id.toString() == node.plus?.node
-                            : n.name
-                            ? n.name == node.plus?.node
-                            : `PT${n.id}` == node.plus?.node
-                    ) as Node;
+                    nextNode = nextNode = this.station.findNode(node.plus?.node!!)!!;
                 } else {
-                    nextNode = this.station.config.nodes.find((n) =>
-                        n.type == "switch"
-                            ? n.id.toString() == node.minus?.node
-                            : n.name
-                            ? n.name == node.minus?.node
-                            : `PT${n.id}` == node.minus?.node
-                    ) as Node;
+                    nextNode = this.station.findNode(node.minus?.node!!)!!;
                 }
 
             }
 
-            if (
-                !nextNode ||
-                (to &&
-                    (node.type == "switch"
-                        ? node.id.toString()
-                        : node.name
-                            ? node.name
-                            : `PT${node.id}`) == to)
-            ) {
+            if (!nextNode || (to && (determineName(node) == to))) { // If there's no next node, and "to" is equal to the current node - finish
                 last = node;
                 finished = true;
                 break;
             }
 
-            if (nextNode.type == "point") {
+            if (nextNode.type == "point") { // If the next node is a waypoint
 
-                if ((nextNode.name ? nextNode.name : `PT${nextNode.id}`) == to) {
+                if (determineName(nextNode) == to) { // If the point's name is equal to "to" - finish
                     last = nextNode;
                     finished = true;
                     break;
                 }
 
                 if (nodeAhead.facing) {
-                    if (
+                    if ( // If the point doesn't have a neighboring node on the side the signal is facing - finish
                         !nextNode[
                             this.backwards
                                 ? nodeAhead.facing == "right"
-                                ? "left"
-                                : "right"
+                                    ? "left"
+                                    : "right"
                                 : nodeAhead.facing
                             ]
                     ) {
@@ -269,42 +210,57 @@ export class Signal {
                         finished = true;
                         break;
                     } else {
-                        while (nextNode.type == "point") {
+                        while (nextNode.type == "point") { // Just in case the point is next to another waypoint
+                            if (determineName(nextNode) == to) {
+                                if (this.checkSwitch(prev, node)) {
+                                    if (this.station.switches.find((s) => s.id == node.id)?.state == 1) {
+                                        directionChange = true;
+                                        safe = true;
+                                    } else {
+                                        safe = true;
+                                    }
+                                } else {
+                                    finished = true;
+                                    safe = false;
+                                }
+                                bypass = true;
+                                break;
+                            }
                             if (node.facing != (this.backwards ? nodeAhead.facing == "right" ? "left" : "right" : nodeAhead.facing)) {
                                 if (node.facing == "right") {
                                     nextNode = this.station.config.nodes.find((n) =>
                                         n.type == "switch"
                                             ? n.id.toString() == nextNode.left
                                             : n.name
-                                            ? n.name == nextNode.left
-                                            : `PT${n.id}` == nextNode.left
+                                                ? n.name == nextNode.left
+                                                : `PT${n.id}` == nextNode.left
                                     ) as Node;
                                 } else {
                                     nextNode = this.station.config.nodes.find((n) =>
                                         n.type == "switch"
                                             ? n.id.toString() == nextNode.right
                                             : n.name
-                                            ? n.name == nextNode.right
-                                            : `PT${n.id}` == nextNode.left
+                                                ? n.name == nextNode.right
+                                                : `PT${n.id}` == nextNode.left
                                     ) as Node;
                                 }
                             } else {
-                                console.log("3")
+                                console.log(nextNode);
                                 if (node.facing == "right") {
                                     nextNode = this.station.config.nodes.find((n) =>
                                         n.type == "switch"
                                             ? n.id.toString() == nextNode.right
                                             : n.name
-                                            ? n.name == nextNode.right
-                                            : `PT${n.id}` == nextNode.right
+                                                ? n.name == nextNode.right
+                                                : `PT${n.id}` == nextNode.right
                                     ) as Node;
                                 } else {
                                     nextNode = this.station.config.nodes.find((n) =>
                                         n.type == "switch"
                                             ? n.id.toString() == nextNode.left
                                             : n.name
-                                            ? n.name == nextNode.left
-                                            : `PT${n.id}` == nextNode.left
+                                                ? n.name == nextNode.left
+                                                : `PT${n.id}` == nextNode.left
                                     ) as Node;
                                 }
                             }
@@ -313,7 +269,7 @@ export class Signal {
                 }
             }
 
-            if (this.checkSwitch(nextNode, node)) {
+            if (!bypass && this.checkSwitch(nextNode, node)) {
                 if (this.station.switches.find((s) => s.id == node.id)?.state == 1) {
                     directionChange = true;
                     safe = true;
@@ -328,6 +284,7 @@ export class Signal {
 
             prev = node;
             last = node;
+            lastSwitch = node;
             node = nextNode;
         }
 
@@ -355,7 +312,8 @@ export class Signal {
         this.setAspect(SignalAspect.RED);
     }
 
-    checkSwitch(next: Node, node: Node) {
+    // Check if switches are set to meet
+    checkSwitch(next: Node, node: Node): boolean {
 
         const nextAsSwitch = this.station.switches.find((s) => s.id == next.id);
         const asSwitch = this.station.switches.find((s) => s.id == node.id);
@@ -364,20 +322,21 @@ export class Signal {
 
             const path = this.station.layout.path(node.id.toString(), next.id.toString());
 
-            if (path && path.length > 2) {
+            if (path && path.length > 2) { // If the path has point between switches
 
-                if (node.back?.node == path[1]) {
+                if (node.back?.node == path[1]) { // If the node behind the current point is the first item in the path
+                    // If the minus neighbor is equal to the last point before "next" return true if it's switched to it
                     if (next.minus?.node == path[path.length - 2]) {
-                        console.log(next)
-                        console.log(path[path.length - 2])
                         return nextAsSwitch?.state == 0;
                     } else if (next.plus?.node == path[path.length - 2]) {
-                        return nextAsSwitch?.state == 1;
+                        return nextAsSwitch?.state == 1; // Same for plus
                     } else {
-                        return true;
+                        return true; // Else they are back-to-back (always true)
                     }
                 } else {
-                    if (node.plus?.node == path[1]) {
+                    // If the first point in the path is the node's plus neighbor
+                    if (node.plus?.node == path[1] || node.minus?.node == path[1]) {
+                        // If "next" is neighboring with the last point in the path at plus or minus
                         if (
                             next.plus?.node == path[path.length - 2] ||
                             next.minus?.node == path[path.length - 2]
@@ -390,22 +349,7 @@ export class Signal {
                                 return nextAsSwitch.state == 0;
                             }
                         } else {
-                            return asSwitch.state == 1;
-                        }
-                    } else if (node.minus?.node == path[1]) {
-                        if (
-                            next.plus?.node == path[path.length - 2] ||
-                            next.minus?.node == path[path.length - 2]
-                        ) {
-                            if (next.plus?.node == path[path.length - 2]) {
-                                return nextAsSwitch.state == 1;
-                            }
-
-                            if (next.minus?.node == path[path.length - 2]) {
-                                return nextAsSwitch.state == 0;
-                            }
-                        } else {
-                            return asSwitch.state == 0;
+                            return asSwitch.state == (node.minus?.node == path[1] ? 0 : 1);
                         }
                     }
                 }
@@ -414,48 +358,30 @@ export class Signal {
 
             if (node.back?.node == next.id.toString()) {
                 if (next.minus?.node == node.id.toString()) {
-                    if (nextAsSwitch?.state == 0) return true;
-                    else return false;
+                    return nextAsSwitch?.state == 0;
                 } else if (next.plus?.node == node.id.toString()) {
-                    if (nextAsSwitch?.state == 1) return true;
-                    else return false;
+                    return nextAsSwitch?.state == 1;
                 } else {
                     return true;
                 }
-            } else {
-                if (node.plus?.node == next.id.toString()) {
-                    if (
-                        next.plus?.node == node.id.toString() ||
-                        next.minus?.node == node.id.toString()
-                    ) {
-                        if (next.plus?.node == node.id.toString()) {
-                            return nextAsSwitch.state == 1;
-                        }
-
-                        if (next.minus?.node == node.id.toString()) {
-                            return nextAsSwitch.state == 0;
-                        }
-                    } else {
-                        return asSwitch.state == 1;
+            } else if (node.plus?.node == next.id.toString() || node.minus?.node == next.id.toString()) {
+                if (
+                    next.plus?.node == node.id.toString() ||
+                    next.minus?.node == node.id.toString()
+                ) {
+                    if (next.plus?.node == node.id.toString()) {
+                        return nextAsSwitch.state == 1;
                     }
-                } else if (node.minus?.node == next.id.toString()) {
-                    if (
-                        next.plus?.node == node.id.toString() ||
-                        next.minus?.node == node.id.toString()
-                    ) {
-                        if (next.plus?.node == node.id.toString()) {
-                            return nextAsSwitch.state == 1;
-                        }
 
-                        if (next.minus?.node == node.id.toString()) {
-                            return nextAsSwitch.state == 0;
-                        }
-                    } else {
-                        return asSwitch.state == 0;
+                    if (next.minus?.node == node.id.toString()) {
+                        return nextAsSwitch.state == 0;
                     }
+                } else {
+                    return asSwitch.state == (node.minus?.node == next.id.toString() ? 0 : 1);
                 }
             }
         }
+        throw new Error("Invalid points!");
     }
 }
 
@@ -474,7 +400,11 @@ export interface SignalObject {
         backwards: boolean;
     };
     back: string;
-    repeaters?: SignalRepeater[]
+    repeaters?: SignalRepeater[];
+    position: {
+        x: number;
+        y: number;
+    }
 }
 
 export interface Aspect {

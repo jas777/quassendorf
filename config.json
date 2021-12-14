@@ -20,7 +20,11 @@
         "switch": 4,
         "backwards": true
       },
-      "back": "WLD"
+      "back": "WLD",
+      "position": {
+        "x": 2.5,
+        "y": 3.9
+      }
     },
     {
       "id": 2,
@@ -61,7 +65,11 @@
           "name": "Tarcza wjazdowa 2"
         }
       ],
-      "back": "PP1"
+      "back": "PP1",
+      "position": {
+        "x": 11,
+        "y": 1
+      }
     },
     {
       "id": 3,
@@ -83,7 +91,11 @@
         "switch": 7,
         "backwards": false
       },
-      "back": "10"
+      "back": "10",
+      "position": {
+        "x": 9 ,
+        "y": 5
+      }
     },
     {
       "id": 4,
@@ -105,7 +117,11 @@
         "switch": 19,
         "backwards": true
       },
-      "back": "PP2"
+      "back": "PP2",
+      "position": {
+        "x": 19,
+        "y": 3.9
+      }
     },
     {
       "id": 5,
@@ -127,7 +143,11 @@
         "switch": 18,
         "backwards": false
       },
-      "back": "16"
+      "back": "16",
+      "position": {
+        "x": 19.3,
+        "y": 5.9
+      }
     },
     {
       "id": 6,
@@ -149,7 +169,11 @@
         "switch": 24,
         "backwards": true
       },
-      "back": "WPG"
+      "back": "WPG",
+      "position": {
+        "x": 34,
+        "y": 1
+      }
     }
   ],
   "lighting": [
@@ -462,12 +486,12 @@
       "type": "switch",
       "id": 8,
       "minus": {
-        "pin": "5-H",
+        "pin": "5-L",
         "node": "3",
         "cost": 1.5
       },
       "plus": {
-        "pin": "5-L",
+        "pin": "5-H",
         "node": "6",
         "cost": 1
       },
@@ -486,12 +510,12 @@
       "type": "switch",
       "id": 10,
       "minus": {
-        "pin": "6-L",
+        "pin": "6-H",
         "node": "TT1",
         "cost": 1
       },
       "plus": {
-        "pin": "6-H",
+        "pin": "6-L",
         "node": "12",
         "cost": 1
       },
@@ -510,12 +534,12 @@
       "type": "switch",
       "id": 12,
       "minus": {
-        "pin": "7-L",
+        "pin": "7-H",
         "node": "B1",
         "cost": 1
       },
       "plus": {
-        "pin": "7-H",
+        "pin": "7-L",
         "node": "10",
         "cost": 1
       },
@@ -534,12 +558,12 @@
       "type": "switch",
       "id": 13,
       "minus": {
-        "pin": "8-H",
+        "pin": "8-L",
         "node": "B3-S",
         "cost": 1
       },
       "plus": {
-        "pin": "8-L",
+        "pin": "8-H",
         "node": "B2",
         "cost": 1
       },
@@ -558,12 +582,12 @@
       "type": "switch",
       "id": 14,
       "minus": {
-        "pin": "9-H",
+        "pin": "9-L",
         "node": "13",
         "cost": 1
       },
       "plus": {
-        "pin": "9-L",
+        "pin": "9-H",
         "node": "12",
         "cost": 1
       },
@@ -582,12 +606,12 @@
       "type": "switch",
       "id": 16,
       "minus": {
-        "pin": "10-L",
+        "pin": "10-H",
         "node": "TT1",
         "cost": 1
       },
       "plus": {
-        "pin": "10-H",
+        "pin": "10-L",
         "node": "14",
         "cost": 1
       },
@@ -606,12 +630,12 @@
       "type": "switch",
       "id": 18,
       "minus": {
-        "pin": "11-H",
+        "pin": "11-L",
         "node": "20",
         "cost": 1
       },
       "plus": {
-        "pin": "11-L",
+        "pin": "11-H",
         "node": "19",
         "cost": 0.5
       },
@@ -726,12 +750,12 @@
       "type": "switch",
       "id": 23,
       "minus": {
-        "pin": "16-L",
+        "pin": "16-H",
         "node": "PP1",
         "cost": 3
       },
       "plus": {
-        "pin": "16-H",
+        "pin": "16-L",
         "node": "22",
         "cost": 0.5
       },
@@ -750,12 +774,12 @@
       "type": "switch",
       "id": 24,
       "minus": {
-        "pin": "17-L",
+        "pin": "17-H",
         "node": "WPG",
         "cost": 1
       },
       "plus": {
-        "pin": "17-H",
+        "pin": "17-L",
         "node": "25",
         "cost": 0.5
       },
@@ -774,12 +798,12 @@
       "type": "switch",
       "id": 25,
       "minus": {
-        "pin": "18-L",
+        "pin": "18-H",
         "node": "22",
         "cost": 2
       },
       "plus": {
-        "pin": "18-H",
+        "pin": "18-L",
         "node": "24",
         "cost": 0.5
       },

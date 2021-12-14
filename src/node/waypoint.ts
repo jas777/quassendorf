@@ -6,10 +6,10 @@ export default class Waypoint {
 
     name?: string;
 
-    left: Node;
-    right: Node;
+    left: Node | null;
+    right: Node | null;
 
-    constructor (id: number, left: Node, right: Node, name?: string) {
+    constructor (id: number, left: Node | null, right: Node | null, name?: string) {
         this.id = id;
         this.left = left;
         this.right = right;

@@ -1,12 +1,10 @@
 import fastify from "fastify";
-import Graph from "node-dijkstra";
-
-import {RailSwitch} from "./switch/switch";
 import Node from "./node/node";
 import MCP23017 from "./mcp/MCP23017";
 import Station from "./station/station";
-import node from "./node/node";
 import Configuration from "./config/Configuration";
+import {defaultPointFilter, defaultSwitchFilter, determineName} from "./util/nameUtil";
+import {checkIfPointsValid} from "./util/checkUtil";
 
 const config: Configuration = require('../config.json');
 
@@ -21,8 +19,7 @@ const stepQueue = new Map<number, string[][]>();
 const switchingCache = new Map<number, { from: string, to: string }>();
 let stepId = 0;
 
-function queuePath(a: string, b: string): number {
-
+function calculateStep(a: string, b: string) {
     const nodes: string[] = station.layout.path(a, b);
 
     let prev: Node;
@@ -36,11 +33,11 @@ function queuePath(a: string, b: string): number {
 
         if (isNaN(Number.parseInt(n))) {
             node = config.nodes.filter(
-                (wp) => wp.type == "point" && (`PT${wp.id}` == n || wp.name == n)
+                (wp) => defaultPointFilter(wp, n)
             )[0] as Node;
         } else {
             node = config.nodes.filter(
-                (wp) => wp.type == "switch" && wp.id.toString() == n
+                (wp) => defaultSwitchFilter(wp, n)
             )[0] as Node;
         }
 
@@ -48,67 +45,46 @@ function queuePath(a: string, b: string): number {
             if (isNaN(Number.parseInt(nodes[i + 1]))) {
                 next = config.nodes.filter(
                     (wp) =>
-                        wp.type == "point" &&
-                        (`PT${wp.id}` == nodes[i + 1] || wp.name == nodes[i + 1])
+                        defaultPointFilter(wp, nodes[i + 1])
                 )[0] as Node;
             } else {
                 next = config.nodes.filter(
-                    (wp) => wp.type == "switch" && wp.id.toString() == nodes[i + 1]
+                    (wp) => defaultSwitchFilter(wp, nodes[i + 1])
                 )[0] as Node;
             }
 
             if (prev) {
                 if (!station.checkDirection(prev, node, next)) {
-                    step.push(
-                        node.type == "switch"
-                            ? node.id.toString()
-                            : node.name
-                            ? node.name
-                            : `PT${node.id}`
-                    );
+                    step.push(determineName(node));
 
                     queue.push(step);
                     step = [];
 
-                    step.push(
-                        node.type == "switch"
-                            ? node.id.toString()
-                            : node.name
-                            ? node.name
-                            : `PT${node.id}`
-                    );
+                    step.push(determineName(node));
                 } else {
-                    step.push(
-                        node.type == "switch"
-                            ? node.id.toString()
-                            : node.name
-                            ? node.name
-                            : `PT${node.id}`
-                    );
+                    step.push(determineName(node));
                 }
             } else {
-                step.push(
-                    node.type == "switch"
-                        ? node.id.toString()
-                        : node.name
-                        ? node.name
-                        : `PT${node.id}`
-                );
+                step.push(determineName(node));
             }
         } else {
-            step.push(
-                node.type == "switch"
-                    ? node.id.toString()
-                    : node.name
-                    ? node.name
-                    : `PT${node.id}`
-            );
+            step.push(determineName(node));
         }
 
         prev = node;
     });
 
     if (step.length > 0) queue.push(step);
+
+    return {
+        queue,
+        step
+    }
+}
+
+function queuePath(a: string, b: string): number {
+
+    const {queue} = calculateStep(a, b);
 
     // station.path(queue[0]);
     //
@@ -124,92 +100,8 @@ function queuePath(a: string, b: string): number {
 }
 
 function checkPath(a: string, b: string): { length: number; queue: string[][] } {
-    const nodes: string[] = station.layout.path(a, b);
 
-    let prev: Node;
-
-    let queue: string[][] = [];
-    let step: string[] = [];
-
-    nodes.forEach((n, i) => {
-        let node: Node;
-        let next: Node;
-
-        if (isNaN(Number.parseInt(n))) {
-            node = config.nodes.filter(
-                (wp) => wp.type == "point" && (`PT${wp.id}` == n || wp.name == n)
-            )[0] as Node;
-        } else {
-            node = config.nodes.filter(
-                (wp) => wp.type == "switch" && wp.id.toString() == n
-            )[0] as Node;
-        }
-
-        if (nodes[i + 1]) {
-            if (isNaN(Number.parseInt(nodes[i + 1]))) {
-                next = config.nodes.filter(
-                    (wp) =>
-                        wp.type == "point" &&
-                        (`PT${wp.id}` == nodes[i + 1] || wp.name == nodes[i + 1])
-                )[0] as Node;
-            } else {
-                next = config.nodes.filter(
-                    (wp) => wp.type == "switch" && wp.id.toString() == nodes[i + 1]
-                )[0] as Node;
-            }
-
-            if (prev) {
-                if (!station.checkDirection(prev, node, next)) {
-                    step.push(
-                        node.type == "switch"
-                            ? node.id.toString()
-                            : node.name
-                            ? node.name
-                            : `PT${node.id}`
-                    );
-
-                    queue.push(step);
-                    step = [];
-
-                    step.push(
-                        node.type == "switch"
-                            ? node.id.toString()
-                            : node.name
-                            ? node.name
-                            : `PT${node.id}`
-                    );
-                } else {
-                    step.push(
-                        node.type == "switch"
-                            ? node.id.toString()
-                            : node.name
-                            ? node.name
-                            : `PT${node.id}`
-                    );
-                }
-            } else {
-                step.push(
-                    node.type == "switch"
-                        ? node.id.toString()
-                        : node.name
-                        ? node.name
-                        : `PT${node.id}`
-                );
-            }
-        } else {
-            step.push(
-                node.type == "switch"
-                    ? node.id.toString()
-                    : node.name
-                    ? node.name
-                    : `PT${node.id}`
-            );
-        }
-
-        prev = node;
-    });
-
-    if (step.length > 0) queue.push(step);
+    const {queue} = calculateStep(a, b);
 
     // station.path(queue[0]);
     //
@@ -259,19 +151,7 @@ server.post("/test", (req, res) => {
 });
 
 server.post("/path/:a/:b", (req, res) => {
-    if (
-        (!station.switches.find((s) => (s.id == Number.parseInt(req.params.a))) &&
-            !station.waypoints.find((w) =>
-                w.name ? w.name == req.params.a : `PT${w.id}` == req.params.a
-            )) ||
-        (!station.switches.find((s) => (s.id == Number.parseInt(req.params.b))) &&
-            !station.waypoints.find((w) =>
-                w.name ? w.name == req.params.b : `PT${w.id}` == req.params.b
-            ))
-    ) {
-        res.code(501).send({error: "Invalid points!"});
-    }
-
+    if(!checkIfPointsValid(station, req, res)) return;
     try {
         const steps = queuePath(req.params.a, req.params.b);
 
@@ -286,19 +166,7 @@ server.post("/path/:a/:b", (req, res) => {
 });
 
 server.post("/check_path/:a/:b", (req, res) => {
-    if (
-        (!station.switches.find((s) => (s.id == Number.parseInt(req.params.a))) &&
-            !station.waypoints.find((w) =>
-                w.name ? w.name == req.params.a : `PT${w.id}` == req.params.a
-            )) ||
-        (!station.switches.find((s) => (s.id == Number.parseInt(req.params.b))) &&
-            !station.waypoints.find((w) =>
-                w.name ? w.name == req.params.b : `PT${w.id}` == req.params.b
-            ))
-    ) {
-        res.code(501).send({error: "Invalid points!"});
-    }
-
+    if(!checkIfPointsValid(station, req, res)) return;
     try {
         res.send(checkPath(req.params.a, req.params.b));
     } catch (err) {
@@ -467,11 +335,20 @@ server.get("/queue", (req, res) => {
         obj1[key] = value;
     });
 
-    res.send({ queue: obj, cache: obj1 });
+    res.send({queue: obj, cache: obj1});
 })
 
 server.get("/config", (req, res) => {
     res.send(config)
+})
+
+server.get("/currentPath", (_req, res) => {
+    res.send(station.currentPath)
+})
+
+server.post("/resetPath", (_req, res) => {
+    station.currentPath = [];
+    res.send([])
 })
 
 server.listen(5000, "0.0.0.0", (err, addr) => {
