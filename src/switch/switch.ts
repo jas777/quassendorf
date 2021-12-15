@@ -65,17 +65,11 @@ export class RailSwitch {
 
     toPlus () {
 
-        // const minusMcp = this.station.controllers[Math.floor(this.minusPin / 16)];
-        // const plusMcp = this.plusPin != this.minusPin ? this.station.controllers[Math.floor(this.plusPin / 16)] : minusMcp;
-
         const plusPin: number = this.station.determinePin(this.plusPin + "-");
         const minusMcp: MCP23017 = this.station.determineController(this.minusPin + "-");
 
         const minusPin: number = this.station.determinePin(this.minusPin + "-");
         const plusMcp: MCP23017 = this.station.determineController(this.plusPin + "-");
-
-        // const plusPin = this.plusPin > 15 ? this.plusPin - (this.station.controllers.indexOf(plusMcp) * 16) : this.plusPin;
-        // const minusPin = this.minusPin > 15 ? this.minusPin - (this.station.controllers.indexOf(minusMcp) * 16) : this.minusPin;
 
         if (minusMcp.readPin(minusPin) == this.minus) {
             minusMcp.writePin(minusPin, this.minus == 0 ? 1 : 0);

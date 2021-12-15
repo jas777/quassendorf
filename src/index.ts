@@ -1,17 +1,17 @@
 import fastify from "fastify";
-import Node from "./node/node";
 import MCP23017 from "./mcp/MCP23017";
 import Station from "./station/station";
 import Configuration from "./config/Configuration";
-import {defaultPointFilter, defaultSwitchFilter, determineName} from "./util/nameUtil";
 import {checkIfPointsValid} from "./util/checkUtil";
+import {calculateStep, checkPath} from "./util/pathUtil";
 
 const config: Configuration = require('../config.json');
 
 const server = fastify({logger: true});
 
 const station = new Station(
-    [new MCP23017(1, 0x26, 0x00, 0x00), new MCP23017(1, 0x27, 0x00, 0x00)],
+    [new MCP23017(1, 0x26, 0xFF, 0xFF),
+        new MCP23017(1, 0x27, 0xFF, 0xFF)],
     config
 );
 
@@ -19,76 +19,9 @@ const stepQueue = new Map<number, string[][]>();
 const switchingCache = new Map<number, { from: string, to: string }>();
 let stepId = 0;
 
-function calculateStep(a: string, b: string) {
-    const nodes: string[] = station.layout.path(a, b);
-
-    let prev: Node;
-
-    let queue: string[][] = [];
-    let step: string[] = [];
-
-    nodes.forEach((n, i) => {
-        let node: Node;
-        let next: Node;
-
-        if (isNaN(Number.parseInt(n))) {
-            node = config.nodes.filter(
-                (wp) => defaultPointFilter(wp, n)
-            )[0] as Node;
-        } else {
-            node = config.nodes.filter(
-                (wp) => defaultSwitchFilter(wp, n)
-            )[0] as Node;
-        }
-
-        if (nodes[i + 1]) {
-            if (isNaN(Number.parseInt(nodes[i + 1]))) {
-                next = config.nodes.filter(
-                    (wp) =>
-                        defaultPointFilter(wp, nodes[i + 1])
-                )[0] as Node;
-            } else {
-                next = config.nodes.filter(
-                    (wp) => defaultSwitchFilter(wp, nodes[i + 1])
-                )[0] as Node;
-            }
-
-            if (prev) {
-                if (!station.checkDirection(prev, node, next)) {
-                    step.push(determineName(node));
-
-                    queue.push(step);
-                    step = [];
-
-                    step.push(determineName(node));
-                } else {
-                    step.push(determineName(node));
-                }
-            } else {
-                step.push(determineName(node));
-            }
-        } else {
-            step.push(determineName(node));
-        }
-
-        prev = node;
-    });
-
-    if (step.length > 0) queue.push(step);
-
-    return {
-        queue,
-        step
-    }
-}
-
 function queuePath(a: string, b: string): number {
 
-    const {queue} = calculateStep(a, b);
-
-    // station.path(queue[0]);
-    //
-    // queue.shift();
+    const {queue} = calculateStep(a, b, station);
 
     stepQueue.set(stepId, queue);
     switchingCache.set(stepId, {
@@ -96,21 +29,6 @@ function queuePath(a: string, b: string): number {
         to: queue[queue.length - 1][queue[queue.length - 1].length - 1]
     });
     return stepId++;
-
-}
-
-function checkPath(a: string, b: string): { length: number; queue: string[][] } {
-
-    const {queue} = calculateStep(a, b);
-
-    // station.path(queue[0]);
-    //
-    // queue.shift();
-
-    return {
-        length: queue.length,
-        queue
-    };
 
 }
 
@@ -151,7 +69,7 @@ server.post("/test", (req, res) => {
 });
 
 server.post("/path/:a/:b", (req, res) => {
-    if(!checkIfPointsValid(station, req, res)) return;
+    if (!checkIfPointsValid(station, req, res)) return;
     try {
         const steps = queuePath(req.params.a, req.params.b);
 
@@ -166,9 +84,9 @@ server.post("/path/:a/:b", (req, res) => {
 });
 
 server.post("/check_path/:a/:b", (req, res) => {
-    if(!checkIfPointsValid(station, req, res)) return;
+    if (!checkIfPointsValid(station, req, res)) return;
     try {
-        res.send(checkPath(req.params.a, req.params.b));
+        res.send(checkPath(req.params.a, req.params.b, station));
     } catch (err) {
         console.error(err);
         res.code(501).send({error: err.message});
@@ -191,7 +109,7 @@ server.post("/steps/:queue/next", (req, res) => {
             } else {
                 station.path(steps[0]);
                 stepQueue.delete(Number.parseInt(req.params.queue));
-                switchingCache.delete(Number.parseInt(req.params.queue))
+                switchingCache.delete(Number.parseInt(req.params.queue));
             }
             res.send({ok: "OK"});
         } catch (err) {
@@ -231,10 +149,13 @@ server.post("/signals/allow/:signal", (req, res) => {
         res.code(501).send({error: "Invalid signal!"});
     }
 
-    let to: string | undefined;
+    let to: string;
 
     if (req.body.to) {
         to = req.body.to;
+    } else {
+        res.code(400).send({message: 'Parameter \'to\' not specified!'});
+        return;
     }
 
     station.signals.find((s) => (s.id == Number.parseInt(req.params.signal)))?.allow(to);
@@ -316,7 +237,7 @@ server.get("/signals", (req, res) => {
 
 server.get("/points", (req, res) => {
 
-    const toSend = [...station.waypoints.map(w => w.name ? w.name : `PT${w.id}`), ...station.switches.map(sw => sw.id)]
+    const toSend = [...station.waypoints.map(w => w.name ?? `PT${w.id}`), ...station.switches.map(sw => sw.id)]
 
     res.send(toSend);
 
