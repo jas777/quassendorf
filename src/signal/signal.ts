@@ -150,8 +150,8 @@ export class Signal {
                     }
 
                 } else {
-                    // TODO: Try to figure out why I wrote this
-                    nextNode = this.station.config.nodes.find(n => n[nodeAhead.facing ?? "left"] == nodeAhead.id.toString()) as Node;
+                    // Find the next node by getting the next node in the direction the nodeAhead is facing
+                    nextNode = this.station.config.nodes.find(n => n[nodeAhead.facing!!] === nodeAhead.id.toString()) as Node;
                 }
             }
 
@@ -182,7 +182,7 @@ export class Signal {
 
             }
 
-            if (!nextNode || (to && (determineName(node) == to))) { // If there's no next node, and "to" is equal to the current node - finish
+            if (!nextNode || determineName(node) == to) { // If there's no next node, and "to" is equal to the current node - finish
                 last = node;
                 finished = true;
                 break;
