@@ -10,8 +10,8 @@ const config: Configuration = require('../config.json');
 const server = fastify({logger: true});
 
 const station = new Station(
-    [new MCP23017(1, 0x26, 0xFF, 0xFF),
-        new MCP23017(1, 0x27, 0xFF, 0xFF)],
+    [new MCP23017(1, 0x26, 0x0, 0x0),
+        new MCP23017(1, 0x27, 0x0, 0x0)],
     config
 );
 
