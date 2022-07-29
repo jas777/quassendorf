@@ -68,7 +68,6 @@ export function calculateStep(a: string, b: string, station: Station) {
 }
 
 export function checkPath(a: string, b: string, station: Station): { length: number; queue: string[][] } {
-
     const {queue} = calculateStep(a, b, station);
 
     return {

@@ -38,7 +38,7 @@ server.addContentTypeParser('application/json', {parseAs: 'string'}, function (r
     try {
         const json = JSON.parse(body);
         done(null, json)
-    } catch (err) {
+    } catch (err: any) {
         err.statusCode = 400
         done(err, undefined)
     }
@@ -49,7 +49,7 @@ server.post("/reset", (req, res) => {
         station.switches.forEach((s) => {
             s.toMinus();
         });
-    } catch (err) {
+    } catch (err: any) {
         res.code(501).send({error: err.message});
     }
 
@@ -61,7 +61,7 @@ server.post("/test", (req, res) => {
         station.switches.forEach((s) => {
             s.toPlus();
         });
-    } catch (err) {
+    } catch (err: any) {
         res.code(501).send({error: err.message});
     }
 
@@ -77,7 +77,7 @@ server.post("/path/:a/:b", (req, res) => {
             queue_id: steps,
             length: stepQueue.get(steps)?.length
         });
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
         res.code(501).send({error: err.message});
     }
@@ -87,7 +87,7 @@ server.post("/check_path/:a/:b", (req, res) => {
     if (!checkIfPointsValid(station, req, res)) return;
     try {
         res.send(checkPath(req.params.a, req.params.b, station));
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
         res.code(501).send({error: err.message});
     }
@@ -112,7 +112,7 @@ server.post("/steps/:queue/next", (req, res) => {
                 switchingCache.delete(Number.parseInt(req.params.queue));
             }
             res.send({ok: "OK"});
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
             res.code(501).send({error: err.message});
         }
@@ -216,9 +216,7 @@ server.get("/switches", (req, res) => {
 });
 
 server.get("/lighting", (req, res) => {
-
     res.send([...station.lightNodes])
-
 });
 
 server.get("/signals", (req, res) => {

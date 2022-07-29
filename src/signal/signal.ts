@@ -109,6 +109,12 @@ export class Signal {
                 mcp.writePin(pin, state);
             }
 
+            if (!this.station.config.constantSignalOperation) {
+                setTimeout(() => {
+                    mcp.writePin(pin, state == 1 ? 0 : 1);
+                }, 1000)
+            }
+
         }
     }
 
@@ -212,20 +218,27 @@ export class Signal {
                     } else {
                         while (nextNode.type == "point") { // Just in case the point is next to another waypoint
                             if (determineName(nextNode) == to) {
+                                console.log(to);
                                 if (this.checkSwitch(prev, node)) {
+                                    console.log('a')
                                     if (this.station.switches.find((s) => s.id == node.id)?.state == 1) {
+                                        console.log('c')
                                         directionChange = true;
                                         safe = true;
                                     } else {
+                                        console.log('d')
                                         safe = true;
                                     }
                                 } else {
+                                    console.log('b')
                                     finished = true;
                                     safe = false;
                                 }
+                                last = nextNode;
                                 bypass = true;
                                 break;
                             }
+
                             // If the node is facing the opposite direction
                             if (node.facing != (this.backwards ? nodeAhead.facing == "right" ? "left" : "right" : nodeAhead.facing)) {
                                 if (node.facing == "right") { // The next node will be on the left
@@ -254,7 +267,7 @@ export class Signal {
                 }
             } else {
                 finished = true; // if bypass is set, finish
-                safe = false;
+                //safe = false;
                 break;
             }
 
@@ -267,11 +280,7 @@ export class Signal {
         if ( // Finalize
             safe &&
             to &&
-            (last.type == "switch"
-                ? last.id.toString()
-                : last.name
-                    ? last.name
-                    : `PT${last.id}`) == to
+            determineName(last) == to
         ) {
             if (directionChange) {
                 this.setAspect(SignalAspect.GREEN_CAUTION);
